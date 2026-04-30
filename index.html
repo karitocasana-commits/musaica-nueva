@@ -22,7 +22,7 @@
 <body>
     <div class="background-3d"></div>
     <header><h1 class="logo">URBAN MUSIC</h1></header>
-    <main id="player-container"><div id="loader">Cargando música de Archive.org...</div></main>
+    <main id="player-container"><div id="loader">Cargando música...</div></main>
 
     <script>
         function cargarCanciones(data) {
@@ -35,6 +35,7 @@
             data.response.docs.forEach(item => {
                 const card = document.createElement('div');
                 card.className = 'song-card';
+                
                 // RUTAS CORREGIDAS CON BARRAS / Y SÍMBOLOS $
                 const coverUrl = `https://archive.org{item.identifier}`;
                 const audioUrl = `https://archive.org{item.identifier}/${item.identifier}.mp3`;
@@ -49,8 +50,8 @@
             });
         }
 
-        // ESTA ES LA LÍNEA QUE DEBES TENER COMPLETA:
         const script = document.createElement('script');
+        // BUSCAMOS TU CANCIÓN DIRECTAMENTE POR IDENTIFICADOR PARA QUE NO FALLE
         script.src = `https://archive.org`;
         document.body.appendChild(script);
     </script>
