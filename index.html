@@ -6,62 +6,61 @@
     <title>Música Nueva - Karito Casana</title>
     <style>
         :root { --neon: #39ff14; --bg: #0a0a0a; }
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; overflow-x: hidden;}
         .background-3d { position: fixed; width: 100vw; height: 100vh; background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://unsplash.com'); background-size: cover; z-index: -1; }
         header { text-align: center; padding: 40px 20px; }
-        .logo { font-size: 2.5rem; color: var(--neon); text-shadow: 0 0 15px var(--neon); text-transform: uppercase; }
-        #player-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; padding: 20px; max-width: 1100px; margin: auto; }
-        .song-card { background: rgba(255,255,255,0.07); backdrop-filter: blur(10px); padding: 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); text-align: center; }
-        .cover-wrapper img { width: 100%; border-radius: 10px; }
+        .logo { font-size: 2.5rem; color: var(--neon); text-shadow: 0 0 15px var(--neon); text-transform: uppercase; letter-spacing: 5px; }
+        #player-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; padding: 20px; max-width: 1100px; margin: auto; }
+        .song-card { background: rgba(255,255,255,0.08); backdrop-filter: blur(10px); padding: 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); text-align: center; transition: transform 0.3s; }
+        .song-card:hover { transform: translateY(-5px); border-color: var(--neon); }
+        .cover-wrapper img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
         audio { width: 100%; margin: 15px 0; filter: invert(1); }
-        .btn-download { display: inline-block; background: var(--neon); color: black; padding: 10px 20px; text-decoration: none; font-weight: bold; border-radius: 5px; }
+        .btn-download { display: inline-block; background: var(--neon); color: black; padding: 12px 25px; text-decoration: none; font-weight: bold; border-radius: 50px; }
+        .btn-download:hover { background: white; }
+        #loader { font-size: 1.2rem; color: #aaa; }
     </style>
 </head>
 <body>
     <div class="background-3d"></div>
     <header><h1 class="logo">URBAN MUSIC</h1></header>
-    <main id="player-container"><div id="loader">Conectando con Archive.org...</div></main>
+    <main id="player-container"><div id="loader">Cargando tu música...</div></main>
 
     <script>
-        const ARCHIVE_USER = 'karito_casana'; 
+        const ARCHIVE_USER = 'karito_casana';
 
-        async function fetchSongs() {
-            // Usamos un proxy para evitar el error de conexión (CORS)
-            const proxy = 'https://allorigins.win';
-            const targetUrl = encodeURIComponent(`https://archive.org{ARCHIVE_USER}+AND+mediatype:audio&output=json`);
-            
-            try {
-                const response = await fetch(proxy + targetUrl);
-                const result = await response.json();
-                const data = JSON.parse(result.contents);
-                const items = data.response.docs;
-                const container = document.getElementById('player-container');
-                container.innerHTML = '';
+        // 1. Esta función recibe los datos directamente de Archive.org
+        function cargarCanciones(data) {
+            const container = document.getElementById('player-container');
+            container.innerHTML = '';
 
-                if (!items || items.length === 0) {
-                    container.innerHTML = '<h2>No hay canciones públicas. Revisa tu Archive.org</h2>';
-                    return;
-                }
-
-                items.forEach(item => {
-                    const card = document.createElement('div');
-                    card.className = 'song-card';
-                    const coverUrl = `https://archive.org{item.identifier}`;
-                    const audioUrl = `https://archive.org{item.identifier}/${item.identifier}.mp3`;
-
-                    card.innerHTML = `
-                        <div class="cover-wrapper"><img src="${coverUrl}" alt="Portada"></div>
-                        <h3>${item.title.replace(/-/g, ' ')}</h3>
-                        <audio controls><source src="${audioUrl}" type="audio/mpeg"></audio>
-                        <a href="${audioUrl}" download class="btn-download">DESCARGAR</a>
-                    `;
-                    container.appendChild(card);
-                });
-            } catch (error) {
-                document.getElementById('loader').innerHTML = `<h3 style="color:red">Error al conectar. Por favor, recarga la página (F5).</h3>`;
+            if (!data || !data.response || !data.response.docs || data.response.docs.length === 0) {
+                container.innerHTML = '<h2>No se encontraron canciones públicas.</h2><p>Verifica que en Archive.org tus archivos sean públicos.</p>';
+                return;
             }
+
+            data.response.docs.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'song-card';
+                
+                // Construimos las URLs
+                const coverUrl = `https://archive.org{item.identifier}`;
+                const audioUrl = `https://archive.org{item.identifier}/${item.identifier}.mp3`;
+
+                card.innerHTML = `
+                    <div class="cover-wrapper"><img src="${coverUrl}" alt="Portada" onerror="this.src='https://archive.org'"></div>
+                    <h3>${item.title ? item.title.replace(/-/g, ' ') : 'Sin Título'}</h3>
+                    <audio controls preload="none"><source src="${audioUrl}" type="audio/mpeg"></audio>
+                    <a href="${audioUrl}" download class="btn-download">DESCARGAR</a>
+                `;
+                container.appendChild(card);
+            });
         }
-        fetchSongs();
+
+        // 2. Creamos el "puente" (Script Tag) para pedir los datos
+        // Usamos 'callback=cargarCanciones' para saltar el error de conexión
+        const script = document.createElement('script');
+        script.src = `https://archive.org{ARCHIVE_USER}+AND+mediatype:audio&output=json&callback=cargarCanciones&rows=50`;
+        document.body.appendChild(script);
     </script>
 </body>
 </html>
