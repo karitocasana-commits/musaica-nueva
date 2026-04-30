@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Música Nueva - Karito Casana</title>
+    <title>URBAN MUSIC - Karito Casana</title>
     <style>
         :root { --neon: #39ff14; --bg: #0a0a0a; }
         body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; overflow-x: hidden;}
@@ -22,29 +22,26 @@
 <body>
     <div class="background-3d"></div>
     <header><h1 class="logo">URBAN MUSIC</h1></header>
-    <main id="player-container"><div id="loader">Sincronizando música...</div></main>
+    <main id="player-container"><div id="loader">Cargando música de Archive.org...</div></main>
 
     <script>
-        const ARCHIVE_USER = 'karito_casana';
-
         function cargarCanciones(data) {
             const container = document.getElementById('player-container');
             if (!data || !data.response || !data.response.docs || data.response.docs.length === 0) {
-                container.innerHTML = '<div id="loader">No se encontraron temas. <br> <small>Asegúrate de que tus archivos en Archive.org sean públicos.</small></div>';
+                container.innerHTML = '<div id="loader">No se encontraron temas públicos.</div>';
                 return;
             }
             container.innerHTML = '';
             data.response.docs.forEach(item => {
                 const card = document.createElement('div');
                 card.className = 'song-card';
+                // RUTAS CORREGIDAS CON BARRAS / Y SÍMBOLOS $
                 const coverUrl = `https://archive.org{item.identifier}`;
                 const audioUrl = `https://archive.org{item.identifier}/${item.identifier}.mp3`;
 
                 card.innerHTML = `
-                    <div class="cover-wrapper">
-                        <img src="${coverUrl}" alt="Portada" loading="lazy" onerror="this.src='https://archive.org'">
-                    </div>
-                    <h3>${item.title ? item.title.replace(/-/g, ' ') : 'Música Nueva'}</h3>
+                    <div class="cover-wrapper"><img src="${coverUrl}" alt="Portada" loading="lazy"></div>
+                    <h3>${item.title ? item.title.replace(/-/g, ' ') : 'Nueva Canción'}</h3>
                     <audio controls preload="none"><source src="${audioUrl}" type="audio/mpeg"></audio>
                     <a href="${audioUrl}" download class="btn-download">DESCARGAR MP3</a>
                 `;
@@ -52,9 +49,9 @@
             });
         }
 
-        // Optimización: Solo pedimos 'identifier' y 'title' para mayor velocidad
+        // ESTA ES LA LÍNEA QUE DEBES TENER COMPLETA:
         const script = document.createElement('script');
-        script.src = `https://archive.org{ARCHIVE_USER}&fl[]=identifier&fl[]=title&output=json&callback=cargarCanciones&rows=50`;
+        script.src = `https://archive.org`;
         document.body.appendChild(script);
     </script>
 </body>
