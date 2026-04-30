@@ -6,54 +6,55 @@
     <title>URBAN MUSIC - Karito Casana</title>
     <style>
         :root { --neon: #39ff14; --bg: #0a0a0a; }
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; overflow-x: hidden;}
-        /* Fondo Urbano Corregido */
-        .background-3d { position: fixed; width: 100vw; height: 100vh; background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://unsplash.com'); background-size: cover; z-index: -1; }
-        header { text-align: center; padding: 40px 20px; }
-        .logo { font-size: 2.5rem; color: var(--neon); text-shadow: 0 0 15px var(--neon); text-transform: uppercase; letter-spacing: 5px; }
+        body { margin: 0; font-family: sans-serif; background: var(--bg); color: white; }
+        .background-3d { position: fixed; width: 100vw; height: 100vh; background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('https://unsplash.com'); background-size: cover; z-index: -1; }
+        header { text-align: center; padding: 40px; }
+        .logo { font-size: 2.5rem; color: var(--neon); text-shadow: 0 0 15px var(--neon); text-transform: uppercase; }
         #player-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; padding: 20px; max-width: 1100px; margin: auto; }
-        .song-card { background: rgba(255,255,255,0.08); backdrop-filter: blur(10px); padding: 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); text-align: center; transition: 0.4s; }
-        .song-card:hover { transform: translateY(-5px); border-color: var(--neon); }
-        .cover-wrapper img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 10px; }
+        .song-card { background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); padding: 20px; border-radius: 15px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
+        .cover-wrapper img { width: 100%; border-radius: 10px; aspect-ratio: 1/1; object-fit: cover; }
         audio { width: 100%; margin: 15px 0; filter: invert(1); }
         .btn-download { display: inline-block; background: var(--neon); color: black; padding: 12px 25px; text-decoration: none; font-weight: bold; border-radius: 50px; }
-        #loader { font-size: 1.5rem; text-align: center; width: 100%; grid-column: 1/-1; color: var(--neon); }
     </style>
 </head>
 <body>
     <div class="background-3d"></div>
     <header><h1 class="logo">URBAN MUSIC</h1></header>
-    <main id="player-container"><div id="loader">Cargando música de Archive.org...</div></main>
+    <main id="player-container"><div id="loader" style="text-align:center;width:100%;">Conectando con Archive.org...</div></main>
 
     <script>
+        // FUNCIÓN DE CARGA SIN SÍMBOLOS COMPLICADOS
         function cargarCanciones(data) {
-            const container = document.getElementById('player-container');
+            var container = document.getElementById('player-container');
             if (!data || !data.response || !data.response.docs || data.response.docs.length === 0) {
-                container.innerHTML = '<div id="loader">No se encontraron temas. <br> <small>Asegúrate de que tus archivos en Archive.org sean públicos.</small></div>';
+                container.innerHTML = '<h2>No hay música pública todavía.</h2>';
                 return;
             }
             container.innerHTML = '';
-            data.response.docs.forEach(item => {
-                const card = document.createElement('div');
+            var items = data.response.docs;
+            for (var i = 0; i < items.length; i++) {
+                var id = items[i].identifier;
+                var title = items[i].title ? items[i].title : 'Música Nueva';
+                
+                var card = document.createElement('div');
                 card.className = 'song-card';
                 
-                // RUTAS CORREGIDAS (Llevan barras / y símbolos $)
-                const coverUrl = `https://archive.org{item.identifier}`;
-                const audioUrl = `https://archive.org{item.identifier}/${item.identifier}.mp3`;
+                var coverUrl = 'https://archive.org' + id;
+                var audioUrl = 'https://archive.org' + id + '/' + id + '.mp3';
 
-                card.innerHTML = `
-                    <div class="cover-wrapper"><img src="${coverUrl}" alt="Portada" loading="lazy"></div>
-                    <h3>${item.title ? item.title.replace(/-/g, ' ') : 'Nueva Canción'}</h3>
-                    <audio controls preload="none"><source src="${audioUrl}" type="audio/mpeg"></audio>
-                    <a href="${audioUrl}" download class="btn-download">DESCARGAR MP3</a>
-                `;
+                card.innerHTML = 
+                    '<div class="cover-wrapper"><img src="' + coverUrl + '"></div>' +
+                    '<h3>' + title + '</h3>' +
+                    '<audio controls><source src="' + audioUrl + '" type="audio/mpeg"></audio>' +
+                    '<a href="' + audioUrl + '" download class="btn-download">DESCARGAR MP3</a>';
+                
                 container.appendChild(card);
-            });
+            }
         }
 
-        // LÍNEA FINAL CORREGIDA:
-        const script = document.createElement('script');
-        script.src = `https://archive.org`;
+        // PETICIÓN DIRECTA A TU USUARIO
+        var script = document.createElement('script');
+        script.src = 'https://archive.org';
         document.body.appendChild(script);
     </script>
 </body>
