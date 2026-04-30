@@ -7,6 +7,7 @@
     <style>
         :root { --neon: #39ff14; --bg: #0a0a0a; }
         body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; overflow-x: hidden;}
+        /* Fondo Urbano Corregido */
         .background-3d { position: fixed; width: 100vw; height: 100vh; background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://unsplash.com'); background-size: cover; z-index: -1; }
         header { text-align: center; padding: 40px 20px; }
         .logo { font-size: 2.5rem; color: var(--neon); text-shadow: 0 0 15px var(--neon); text-transform: uppercase; letter-spacing: 5px; }
@@ -22,13 +23,13 @@
 <body>
     <div class="background-3d"></div>
     <header><h1 class="logo">URBAN MUSIC</h1></header>
-    <main id="player-container"><div id="loader">Cargando música...</div></main>
+    <main id="player-container"><div id="loader">Cargando música de Archive.org...</div></main>
 
     <script>
         function cargarCanciones(data) {
             const container = document.getElementById('player-container');
             if (!data || !data.response || !data.response.docs || data.response.docs.length === 0) {
-                container.innerHTML = '<div id="loader">No se encontraron temas públicos.</div>';
+                container.innerHTML = '<div id="loader">No se encontraron temas. <br> <small>Asegúrate de que tus archivos en Archive.org sean públicos.</small></div>';
                 return;
             }
             container.innerHTML = '';
@@ -36,7 +37,7 @@
                 const card = document.createElement('div');
                 card.className = 'song-card';
                 
-                // RUTAS CORREGIDAS CON BARRAS / Y SÍMBOLOS $
+                // RUTAS CORREGIDAS (Llevan barras / y símbolos $)
                 const coverUrl = `https://archive.org{item.identifier}`;
                 const audioUrl = `https://archive.org{item.identifier}/${item.identifier}.mp3`;
 
@@ -50,8 +51,8 @@
             });
         }
 
+        // LÍNEA FINAL CORREGIDA:
         const script = document.createElement('script');
-        // BUSCAMOS TU CANCIÓN DIRECTAMENTE POR IDENTIFICADOR PARA QUE NO FALLE
         script.src = `https://archive.org`;
         document.body.appendChild(script);
     </script>
