@@ -12,7 +12,7 @@
         .logo { font-size: 2.5rem; color: var(--neon); text-shadow: 0 0 15px var(--neon); text-transform: uppercase; }
         #player-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; padding: 20px; max-width: 1100px; margin: auto; }
         .song-card { background: rgba(255,255,255,0.07); backdrop-filter: blur(10px); padding: 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); text-align: center; }
-        .cover-wrapper img { width: 100%; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        .cover-wrapper img { width: 100%; border-radius: 10px; }
         audio { width: 100%; margin: 15px 0; filter: invert(1); }
         .btn-download { display: inline-block; background: var(--neon); color: black; padding: 10px 20px; text-decoration: none; font-weight: bold; border-radius: 5px; }
     </style>
@@ -26,20 +26,20 @@
         const ARCHIVE_USER = 'karito_casana'; 
 
         async function fetchSongs() {
-            // URL OFICIAL DE BÚSQUEDA (CORREGIDA)
-            const url = `https://archive.org{ARCHIVE_USER}+AND+mediatype:audio&output=json`;
+            // Usamos un proxy para evitar el error de conexión (CORS)
+            const proxy = 'https://allorigins.win';
+            const targetUrl = encodeURIComponent(`https://archive.org{ARCHIVE_USER}+AND+mediatype:audio&output=json`);
             
             try {
-                const response = await fetch(url);
-                if (!response.ok) throw new Error('Error en el servidor');
-                
-                const data = await response.json();
+                const response = await fetch(proxy + targetUrl);
+                const result = await response.json();
+                const data = JSON.parse(result.contents);
                 const items = data.response.docs;
                 const container = document.getElementById('player-container');
                 container.innerHTML = '';
 
                 if (!items || items.length === 0) {
-                    container.innerHTML = '<h2>No hay canciones públicas subidas por este usuario.</h2>';
+                    container.innerHTML = '<h2>No hay canciones públicas. Revisa tu Archive.org</h2>';
                     return;
                 }
 
@@ -58,12 +58,7 @@
                     container.appendChild(card);
                 });
             } catch (error) {
-                console.error(error);
-                document.getElementById('loader').innerHTML = `
-                    <div style="color: #ff4444;">
-                        <h3>Error de conexión</h3>
-                        <p>No se pudo obtener la música. Intenta recargar la página.</p>
-                    </div>`;
+                document.getElementById('loader').innerHTML = `<h3 style="color:red">Error al conectar. Por favor, recarga la página (F5).</h3>`;
             }
         }
         fetchSongs();
