@@ -19,13 +19,13 @@
         <div id="loader">Cargando beats...</div>
     </main>
 
-    <script>
-        // CONFIGURACIÓN IMPORTANTE: 
-        // Cambia 'TU_USUARIO' por tu nombre de usuario de Archive.org o una palabra clave que uses en tus subidas.
+        <script>
+        // CONFIGURACIÓN:
         const ARCHIVE_USER = 'karito_casana'; 
 
         async function fetchSongs() {
-            const url = `https://archive.org{karito_casana}+AND+mediatype:audio&output=json`;
+            // URL Corregida para buscar tus archivos
+            const url = `https://archive.org{ARCHIVE_USER}+AND+mediatype:audio&output=json`;
             
             try {
                 const response = await fetch(url);
@@ -34,11 +34,16 @@
                 const container = document.getElementById('player-container');
                 container.innerHTML = '';
 
+                if (items.length === 0) {
+                    container.innerHTML = '<div id="loader">No se encontraron canciones públicas aún.</div>';
+                    return;
+                }
+
                 items.forEach(item => {
                     const card = document.createElement('div');
                     card.className = 'song-card';
                     
-                    // Construimos las URLs de Archive.org
+                    // URLs corregidas para imágenes y audio
                     const coverUrl = `https://archive.org{item.identifier}`;
                     const audioUrl = `https://archive.org{item.identifier}/${item.identifier}.mp3`;
 
@@ -56,7 +61,7 @@
                 });
             } catch (error) {
                 console.error("Error cargando:", error);
-                document.getElementById('loader').innerText = "Sube canciones a Archive.org para verlas aquí.";
+                document.getElementById('loader').innerText = "Error al conectar con Archive.org.";
             }
         }
 
@@ -64,3 +69,4 @@
     </script>
 </body>
 </html>
+
