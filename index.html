@@ -26,15 +26,21 @@
     <main id="player-container"><div id="loader">Cargando tu música...</div></main>
 
     <script>
+        // Usamos tu ID exacto de Archive.org
         const ARCHIVE_USER = 'karito_casana';
 
-        // 1. Esta función recibe los datos directamente de Archive.org
         function cargarCanciones(data) {
             const container = document.getElementById('player-container');
             container.innerHTML = '';
 
+            // Si no hay datos, intentamos otra búsqueda o avisamos
             if (!data || !data.response || !data.response.docs || data.response.docs.length === 0) {
-                container.innerHTML = '<h2>No se encontraron canciones públicas.</h2><p>Verifica que en Archive.org tus archivos sean públicos.</p>';
+                container.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 50px;">
+                        <h2>Aún procesando tus temas...</h2>
+                        <p>Archive.org tarda unos minutos en hacer pública la música nueva.</p>
+                        <a href="https://archive.org" target="_blank" style="color:#39ff14">Ver mi perfil en Archive.org</a>
+                    </div>`;
                 return;
             }
 
@@ -42,25 +48,26 @@
                 const card = document.createElement('div');
                 card.className = 'song-card';
                 
-                // Construimos las URLs
+                // URLs automáticas
                 const coverUrl = `https://archive.org{item.identifier}`;
                 const audioUrl = `https://archive.org{item.identifier}/${item.identifier}.mp3`;
 
                 card.innerHTML = `
-                    <div class="cover-wrapper"><img src="${coverUrl}" alt="Portada" onerror="this.src='https://archive.org'"></div>
-                    <h3>${item.title ? item.title.replace(/-/g, ' ') : 'Sin Título'}</h3>
-                    <audio controls preload="none"><source src="${audioUrl}" type="audio/mpeg"></audio>
-                    <a href="${audioUrl}" download class="btn-download">DESCARGAR</a>
+                    <div class="cover-wrapper">
+                        <img src="${coverUrl}" alt="Portada" onerror="this.src='https://archive.org'">
+                    </div>
+                    <h3>${item.title ? item.title.replace(/-/g, ' ') : 'Música Nueva'}</h3>
+                    <audio controls preload="none">
+                        <source src="${audioUrl}" type="audio/mpeg">
+                    </audio>
+                    <a href="${audioUrl}" download class="btn-download">DESCARGAR MP3</a>
                 `;
                 container.appendChild(card);
             });
         }
 
-        // 2. Creamos el "puente" (Script Tag) para pedir los datos
-        // Usamos 'callback=cargarCanciones' para saltar el error de conexión
+        // Esta línea es la clave: busca por uploader O por creador para no fallar
         const script = document.createElement('script');
-        script.src = `https://archive.org{ARCHIVE_USER}+AND+mediatype:audio&output=json&callback=cargarCanciones&rows=50`;
+        script.src = `https://archive.org(uploader:${ARCHIVE_USER} OR creator:${ARCHIVE_USER})&output=json&callback=cargarCanciones&rows=50`;
         document.body.appendChild(script);
     </script>
-</body>
-</html>
