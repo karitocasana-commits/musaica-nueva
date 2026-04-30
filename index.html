@@ -22,7 +22,7 @@
 <body>
     <div class="background-3d"></div>
     <header><h1 class="logo">URBAN MUSIC</h1></header>
-    <main id="player-container"><div id="loader">Sincronizando con Archive.org...</div></main>
+    <main id="player-container"><div id="loader">Cargando música desde Archive.org...</div></main>
 
     <script>
         const ARCHIVE_USER = 'karito_casana';
@@ -31,7 +31,7 @@
             const container = document.getElementById('player-container');
             
             if (!data || !data.response || !data.response.docs || data.response.docs.length === 0) {
-                container.innerHTML = '<div id="loader">Todavía no hay temas públicos. <br> <small>Si acabas de subir uno, espera 10 min.</small></div>';
+                container.innerHTML = '<div id="loader">Todavía no hay temas públicos. <br> <small>Asegúrate de que tus archivos en Archive.org sean públicos.</small></div>';
                 return;
             }
 
@@ -40,6 +40,7 @@
                 const card = document.createElement('div');
                 card.className = 'song-card';
                 
+                // RUTAS CORREGIDAS CON BARRAS /
                 const coverUrl = `https://archive.org{item.identifier}`;
                 const audioUrl = `https://archive.org{item.identifier}/${item.identifier}.mp3`;
 
@@ -55,9 +56,9 @@
             });
         }
 
-        // Búsqueda mejorada: Busca por uploader o por cualquier mención a tu usuario
+        // BÚSQUEDA CORREGIDA (API OFICIAL)
         const script = document.createElement('script');
-        script.src = `https://archive.org:(${ARCHIVE_USER})&output=json&callback=cargarCanciones&rows=50`;
+        script.src = `https://archive.org{ARCHIVE_USER}&output=json&callback=cargarCanciones&rows=50`;
         document.body.appendChild(script);
     </script>
 </body>
