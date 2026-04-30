@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="MUSICA NUEVA" content="width=device-width, initial-scale=1.0">
+    <title>Mi Player Urbano 3D</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://googleapis.com" rel="stylesheet">
+</head>
+<body>
+    <div class="background-3d"></div>
+    
+    <header>
+        <h1 class="logo">URBAN VIBES</h1>
+    </header>
+
+    <main id="player-container">
+        <!-- Aquí se cargarán las canciones automáticamente -->
+        <div id="loader">Cargando beats...</div>
+    </main>
+
+    <script>
+        // CONFIGURACIÓN IMPORTANTE: 
+        // Cambia 'TU_USUARIO' por tu nombre de usuario de Archive.org o una palabra clave que uses en tus subidas.
+        const ARCHIVE_USER = 'karito_casana'; 
+
+        async function fetchSongs() {
+            const url = `https://archive.org{KARITO CASANA}+AND+mediatype:audio&output=json`;
+            
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                const items = data.response.docs;
+                const container = document.getElementById('player-container');
+                container.innerHTML = '';
+
+                items.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'song-card';
+                    
+                    // Construimos las URLs de Archive.org
+                    const coverUrl = `https://archive.org{item.identifier}`;
+                    const audioUrl = `https://archive.org{item.identifier}/${item.identifier}.mp3`;
+
+                    card.innerHTML = `
+                        <div class="cover-wrapper">
+                            <img src="${coverUrl}" alt="Portada">
+                        </div>
+                        <h3>${item.title}</h3>
+                        <audio controls>
+                            <source src="${audioUrl}" type="audio/mpeg">
+                        </audio>
+                        <a href="${audioUrl}" download class="btn-download">DESCARGAR DIRECTA</a>
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (error) {
+                console.error("Error cargando:", error);
+                document.getElementById('loader').innerText = "Sube canciones a Archive.org para verlas aquí.";
+            }
+        }
+
+        fetchSongs();
+    </script>
+</body>
+</html>
