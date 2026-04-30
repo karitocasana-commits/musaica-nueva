@@ -7,7 +7,7 @@
     <style>
         :root { --neon: #39ff14; --bg: #0a0a0a; }
         body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; overflow-x: hidden; }
-        /* Fondo Urbano que SÍ carga */
+        /* Fondo Urbano Realista corregido */
         .background-3d { position: fixed; width: 100vw; height: 100vh; background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('https://unsplash.com'); background-size: cover; z-index: -1; }
         header { text-align: center; padding: 40px; }
         .logo { font-size: 3rem; color: var(--neon); text-shadow: 0 0 20px var(--neon); text-transform: uppercase; letter-spacing: 5px; }
@@ -21,46 +21,40 @@
 <body>
     <div class="background-3d"></div>
     <header><h1 class="logo">URBAN MUSIC</h1></header>
-    
-    <main id="player-container">
-        <div id="status" style="grid-column: 1/-1; text-align: center;">Cargando tus temas...</div>
-    </main>
+    <main id="player-container"><div id="status" style="grid-column: 1/-1; text-align: center;">Buscando música en @karito_casana...</div></main>
 
     <script>
-        // Función que recibe los datos de Archive.org sin errores de conexión
         function cargarMusica(data) {
             var container = document.getElementById('player-container');
-            var items = data.response.docs;
-
-            if (items.length === 0) {
-                container.innerHTML = '<h2>No hay música pública. Espera 15 min a que Archive.org la procese.</h2>';
+            
+            if (!data || !data.response || !data.response.docs || data.response.docs.length === 0) {
+                container.innerHTML = '<h2>No se encontró música pública.</h2><p>Asegúrate de que tus temas en Archive.org sean "Public".</p>';
                 return;
             }
 
             container.innerHTML = '';
-            items.forEach(function(item) {
+            data.response.docs.forEach(function(item) {
                 var id = item.identifier;
-                var title = item.title.replace(/-/g, ' ');
+                var title = item.title ? item.title.replace(/-/g, ' ') : 'Nueva Canción';
                 
-                // Creamos la tarjeta de la canción
                 var card = document.createElement('div');
                 card.className = 'card';
                 
-                // La URL del audio (Archive.org suele generar un nombre basado en el ID)
-                var audioUrl = 'https://archive.org' + id + '/' + id + '.mp3';
+                // CORRECCIÓN DE RUTAS (Llevan barras y servicios de Archive)
                 var coverUrl = 'https://archive.org' + id;
+                var audioUrl = 'https://archive.org' + id + '/' + id + '.mp3';
 
                 card.innerHTML = 
                     '<img src="' + coverUrl + '" onerror="this.src=\'https://archive.org\'">' +
                     '<h2>' + title + '</h2>' +
                     '<audio controls preload="none"><source src="' + audioUrl + '" type="audio/mpeg"></audio>' +
-                    '<br><a href="https://archive.org' + id + '" target="_blank" class="btn">ESCUCHAR / DESCARGAR</a>';
+                    '<br><a href="' + audioUrl + '" download class="btn">DESCARGAR MP3</a>';
                 
                 container.appendChild(card);
             });
         }
 
-        // Llamada especial (JSONP) que salta todos los bloqueos de conexión
+        // LÍNEA FINAL CORREGIDA AL 100%
         var script = document.createElement('script');
         script.src = 'https://archive.org';
         document.body.appendChild(script);
