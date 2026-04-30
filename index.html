@@ -2,29 +2,32 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="MUSICA NUEVA" content="width=device-width, initial-scale=1.0">
-    <title>Mi Player Urbano 3D</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://googleapis.com" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Música Nueva - Karito Casana</title>
+    <style>
+        :root { --neon: #39ff14; --bg: #0a0a0a; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; }
+        .background-3d { position: fixed; width: 100vw; height: 100vh; background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://unsplash.com'); background-size: cover; z-index: -1; }
+        header { text-align: center; padding: 50px 20px; }
+        .logo { font-size: 3rem; text-transform: uppercase; letter-spacing: 10px; color: var(--neon); text-shadow: 0 0 20px var(--neon); }
+        #player-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; padding: 20px; max-width: 1200px; margin: auto; }
+        .song-card { background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); padding: 20px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); text-align: center; transition: 0.4s; }
+        .song-card:hover { transform: translateY(-10px); border-color: var(--neon); box-shadow: 0 0 30px rgba(57, 255, 20, 0.2); }
+        .cover-wrapper img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        audio { width: 100%; margin: 20px 0; filter: invert(1); }
+        .btn-download { display: inline-block; background: var(--neon); color: black; padding: 12px 25px; text-decoration: none; font-weight: bold; border-radius: 50px; transition: 0.3s; }
+        .btn-download:hover { background: white; transform: scale(1.1); }
+    </style>
 </head>
 <body>
     <div class="background-3d"></div>
-    
-    <header>
-        <h1 class="logo">MUSICA NUEVA</h1>
-    </header>
+    <header><h1 class="logo">URBAN MUSIC</h1></header>
+    <main id="player-container"><div id="loader">Cargando tus temas...</div></main>
 
-    <main id="player-container">
-        <!-- Aquí se cargarán las canciones automáticamente -->
-        <div id="loader">Cargando beats...</div>
-    </main>
-
-        <script>
-        // CONFIGURACIÓN:
+    <script>
         const ARCHIVE_USER = 'karito_casana'; 
 
         async function fetchSongs() {
-            // URL Corregida para buscar tus archivos
             const url = `https://archive.org{ARCHIVE_USER}+AND+mediatype:audio&output=json`;
             
             try {
@@ -35,7 +38,7 @@
                 container.innerHTML = '';
 
                 if (items.length === 0) {
-                    container.innerHTML = '<div id="loader">No se encontraron canciones públicas aún.</div>';
+                    container.innerHTML = '<h2>Sube más canciones a Archive.org para verlas aquí.</h2>';
                     return;
                 }
 
@@ -43,30 +46,23 @@
                     const card = document.createElement('div');
                     card.className = 'song-card';
                     
-                    // URLs corregidas para imágenes y audio
+                    // URLs oficiales de Archive.org
                     const coverUrl = `https://archive.org{item.identifier}`;
                     const audioUrl = `https://archive.org{item.identifier}/${item.identifier}.mp3`;
 
                     card.innerHTML = `
-                        <div class="cover-wrapper">
-                            <img src="${coverUrl}" alt="Portada">
-                        </div>
-                        <h3>${item.title}</h3>
-                        <audio controls>
-                            <source src="${audioUrl}" type="audio/mpeg">
-                        </audio>
-                        <a href="${audioUrl}" download class="btn-download">DESCARGAR DIRECTA</a>
+                        <div class="cover-wrapper"><img src="${coverUrl}" alt="Portada"></div>
+                        <h3>${item.title.replace(/-/g, ' ')}</h3>
+                        <audio controls><source src="${audioUrl}" type="audio/mpeg"></audio>
+                        <a href="${audioUrl}" download class="btn-download">DESCARGAR MP3</a>
                     `;
                     container.appendChild(card);
                 });
             } catch (error) {
-                console.error("Error cargando:", error);
-                document.getElementById('loader').innerText = "Error al conectar con Archive.org.";
+                document.getElementById('loader').innerText = "Error de conexión.";
             }
         }
-
         fetchSongs();
     </script>
 </body>
 </html>
-
