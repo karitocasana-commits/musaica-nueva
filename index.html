@@ -6,57 +6,52 @@
     <title>URBAN MUSIC - Karito Casana</title>
     <style>
         :root { --neon: #39ff14; --bg: #0a0a0a; }
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; overflow-x: hidden; }
-        /* Fondo Urbano Realista corregido */
+        body { margin: 0; font-family: sans-serif; background: var(--bg); color: white; }
         .background-3d { position: fixed; width: 100vw; height: 100vh; background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('https://unsplash.com'); background-size: cover; z-index: -1; }
         header { text-align: center; padding: 40px; }
-        .logo { font-size: 3rem; color: var(--neon); text-shadow: 0 0 20px var(--neon); text-transform: uppercase; letter-spacing: 5px; }
-        #player-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; padding: 20px; max-width: 1100px; margin: auto; }
-        .card { background: rgba(255,255,255,0.05); backdrop-filter: blur(15px); border: 1px solid var(--neon); border-radius: 20px; padding: 20px; text-align: center; }
-        .card img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 15px; margin-bottom: 15px; background: #222; }
-        audio { width: 100%; filter: invert(1); margin: 15px 0; }
-        .btn { background: var(--neon); color: black; padding: 12px 25px; text-decoration: none; font-weight: bold; border-radius: 50px; display: inline-block; }
+        .logo { font-size: 2.5rem; color: var(--neon); text-shadow: 0 0 15px var(--neon); text-transform: uppercase; }
+        #player-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; padding: 20px; max-width: 1100px; margin: auto; }
+        .song-card { background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); padding: 20px; border-radius: 15px; text-align: center; border: 1px solid var(--neon); }
+        .cover-wrapper img { width: 100%; border-radius: 10px; aspect-ratio: 1/1; object-fit: cover; }
+        audio { width: 100%; margin: 15px 0; filter: invert(1); }
+        .btn-download { display: inline-block; background: var(--neon); color: black; padding: 12px 25px; text-decoration: none; font-weight: bold; border-radius: 50px; }
     </style>
 </head>
 <body>
     <div class="background-3d"></div>
     <header><h1 class="logo">URBAN MUSIC</h1></header>
-    <main id="player-container"><div id="status" style="grid-column: 1/-1; text-align: center;">Buscando música en @karito_casana...</div></main>
+    <main id="player-container"><div id="loader" style="text-align:center;width:100%;">Cargando tus temas...</div></main>
 
     <script>
         function cargarMusica(data) {
             var container = document.getElementById('player-container');
-            
-            if (!data || !data.response || !data.response.docs || data.response.docs.length === 0) {
-                container.innerHTML = '<h2>No se encontró música pública.</h2><p>Asegúrate de que tus temas en Archive.org sean "Public".</p>';
+            var items = data.response.docs;
+            if (!items || items.length === 0) {
+                container.innerHTML = '<h2>No se encontró música pública.</h2><p>Asegúrate de que tus temas en Archive.org no sean privados.</p>';
                 return;
             }
-
             container.innerHTML = '';
-            data.response.docs.forEach(function(item) {
-                var id = item.identifier;
-                var title = item.title ? item.title.replace(/-/g, ' ') : 'Nueva Canción';
-                
+            for (var i = 0; i < items.length; i++) {
+                var id = items[i].identifier;
+                var title = items[i].title ? items[i].title : 'Nueva Canción';
                 var card = document.createElement('div');
-                card.className = 'card';
-                
-                // CORRECCIÓN DE RUTAS (Llevan barras y servicios de Archive)
+                card.className = 'song-card';
                 var coverUrl = 'https://archive.org' + id;
+                // Buscamos el archivo real de audio
                 var audioUrl = 'https://archive.org' + id + '/' + id + '.mp3';
-
-                card.innerHTML = 
-                    '<img src="' + coverUrl + '" onerror="this.src=\'https://archive.org\'">' +
-                    '<h2>' + title + '</h2>' +
-                    '<audio controls preload="none"><source src="' + audioUrl + '" type="audio/mpeg"></audio>' +
-                    '<br><a href="' + audioUrl + '" download class="btn">DESCARGAR MP3</a>';
                 
+                card.innerHTML = 
+                    '<div class="cover-wrapper"><img src="' + coverUrl + '"></div>' +
+                    '<h3>' + title + '</h3>' +
+                    '<audio controls><source src="' + audioUrl + '" type="audio/mpeg"></audio>' +
+                    '<br><a href="' + audioUrl + '" download class="btn-download">DESCARGAR</a>';
                 container.appendChild(card);
-            });
+            }
         }
 
-        // LÍNEA FINAL CORREGIDA AL 100%
+        // BÚSQUEDA DOBLE: Por usuario O por identificador directo
         var script = document.createElement('script');
-        script.src = 'https://archive.org';
+        script.src = 'https://archive.org(uploader:karito_casana OR identifier:la-bella-luz-coqueta)&output=json&callback=cargarMusica';
         document.body.appendChild(script);
     </script>
 </body>
