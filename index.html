@@ -6,12 +6,12 @@
     <title>URBAN MUSIC - Karito Casana</title>
     <style>
         :root { --neon: #39ff14; --bg: #0a0a0a; }
-        body { margin: 0; font-family: sans-serif; background: var(--bg); color: white; }
+        body { margin: 0; font-family: sans-serif; background: var(--bg); color: white; text-align: center; }
         .background-3d { position: fixed; width: 100vw; height: 100vh; background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('https://unsplash.com'); background-size: cover; z-index: -1; }
-        header { text-align: center; padding: 40px; }
+        header { padding: 40px; }
         .logo { font-size: 2.5rem; color: var(--neon); text-shadow: 0 0 15px var(--neon); text-transform: uppercase; }
-        #player-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; padding: 20px; max-width: 1100px; margin: auto; }
-        .song-card { background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); padding: 20px; border-radius: 15px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
+        #player-container { display: flex; justify-content: center; padding: 20px; }
+        .song-card { background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); padding: 20px; border-radius: 15px; width: 300px; border: 1px solid var(--neon); }
         .cover-wrapper img { width: 100%; border-radius: 10px; aspect-ratio: 1/1; object-fit: cover; }
         audio { width: 100%; margin: 15px 0; filter: invert(1); }
         .btn-download { display: inline-block; background: var(--neon); color: black; padding: 12px 25px; text-decoration: none; font-weight: bold; border-radius: 50px; }
@@ -20,42 +20,19 @@
 <body>
     <div class="background-3d"></div>
     <header><h1 class="logo">URBAN MUSIC</h1></header>
-    <main id="player-container"><div id="loader" style="text-align:center;width:100%;">Conectando con Archive.org...</div></main>
-
-    <script>
-        // FUNCIÓN DE CARGA SIN SÍMBOLOS COMPLICADOS
-        function cargarCanciones(data) {
-            var container = document.getElementById('player-container');
-            if (!data || !data.response || !data.response.docs || data.response.docs.length === 0) {
-                container.innerHTML = '<h2>No hay música pública todavía.</h2>';
-                return;
-            }
-            container.innerHTML = '';
-            var items = data.response.docs;
-            for (var i = 0; i < items.length; i++) {
-                var id = items[i].identifier;
-                var title = items[i].title ? items[i].title : 'Música Nueva';
-                
-                var card = document.createElement('div');
-                card.className = 'song-card';
-                
-                var coverUrl = 'https://archive.org' + id;
-                var audioUrl = 'https://archive.org' + id + '/' + id + '.mp3';
-
-                card.innerHTML = 
-                    '<div class="cover-wrapper"><img src="' + coverUrl + '"></div>' +
-                    '<h3>' + title + '</h3>' +
-                    '<audio controls><source src="' + audioUrl + '" type="audio/mpeg"></audio>' +
-                    '<a href="' + audioUrl + '" download class="btn-download">DESCARGAR MP3</a>';
-                
-                container.appendChild(card);
-            }
-        }
-
-        // PETICIÓN DIRECTA A TU USUARIO
-        var script = document.createElement('script');
-        script.src = 'https://archive.org';
-        document.body.appendChild(script);
-    </script>
+    <main id="player-container">
+        <!-- CANCIÓN DIRECTA SIN BUSCADORES -->
+        <div class="song-card">
+            <div class="cover-wrapper">
+                <img src="https://archive.org">
+            </div>
+            <h3>La Bella Luz - Coqueta</h3>
+            <audio controls>
+                <source src="https://archive.org" type="audio/mpeg">
+            </audio>
+            <br>
+            <a href="https://archive.org" download class="btn-download">DESCARGAR MP3</a>
+        </div>
+    </main>
 </body>
 </html>
