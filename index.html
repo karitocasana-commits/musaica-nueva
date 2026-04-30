@@ -11,36 +11,28 @@
         header { text-align: center; padding: 40px 20px; }
         .logo { font-size: 2.5rem; color: var(--neon); text-shadow: 0 0 15px var(--neon); text-transform: uppercase; letter-spacing: 5px; }
         #player-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; padding: 20px; max-width: 1100px; margin: auto; }
-        .song-card { background: rgba(255,255,255,0.08); backdrop-filter: blur(10px); padding: 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); text-align: center; transition: transform 0.3s; }
+        .song-card { background: rgba(255,255,255,0.08); backdrop-filter: blur(10px); padding: 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); text-align: center; transition: 0.4s; }
         .song-card:hover { transform: translateY(-5px); border-color: var(--neon); }
         .cover-wrapper img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
         audio { width: 100%; margin: 15px 0; filter: invert(1); }
         .btn-download { display: inline-block; background: var(--neon); color: black; padding: 12px 25px; text-decoration: none; font-weight: bold; border-radius: 50px; }
-        .btn-download:hover { background: white; }
-        #loader { font-size: 1.2rem; color: #aaa; }
+        #loader { font-size: 1.5rem; text-align: center; width: 100%; grid-column: 1/-1; }
     </style>
 </head>
 <body>
     <div class="background-3d"></div>
     <header><h1 class="logo">URBAN MUSIC</h1></header>
-    <main id="player-container"><div id="loader">Cargando tu música...</div></main>
+    <main id="player-container"><div id="loader">Buscando tus temas en Archive.org...</div></main>
 
     <script>
-        // Usamos tu ID exacto de Archive.org
         const ARCHIVE_USER = 'karito_casana';
 
         function cargarCanciones(data) {
             const container = document.getElementById('player-container');
             container.innerHTML = '';
 
-            // Si no hay datos, intentamos otra búsqueda o avisamos
             if (!data || !data.response || !data.response.docs || data.response.docs.length === 0) {
-                container.innerHTML = `
-                    <div style="grid-column: 1/-1; text-align: center; padding: 50px;">
-                        <h2>Aún procesando tus temas...</h2>
-                        <p>Archive.org tarda unos minutos en hacer pública la música nueva.</p>
-                        <a href="https://archive.org" target="_blank" style="color:#39ff14">Ver mi perfil en Archive.org</a>
-                    </div>`;
+                container.innerHTML = `<h2>Aún no hay música pública.</h2><p>Asegúrate de que tus archivos en Archive.org sean públicos.</p>`;
                 return;
             }
 
@@ -48,7 +40,7 @@
                 const card = document.createElement('div');
                 card.className = 'song-card';
                 
-                // URLs automáticas
+                // CORRECCIÓN DE URLs (Barras y rutas oficiales)
                 const coverUrl = `https://archive.org{item.identifier}`;
                 const audioUrl = `https://archive.org{item.identifier}/${item.identifier}.mp3`;
 
@@ -66,8 +58,9 @@
             });
         }
 
-        // Esta línea es la clave: busca por uploader O por creador para no fallar
         const script = document.createElement('script');
-        script.src = `https://archive.org(uploader:${ARCHIVE_USER} OR creator:${ARCHIVE_USER})&output=json&callback=cargarCanciones&rows=50`;
+        script.src = `https://archive.org{ARCHIVE_USER}&output=json&callback=cargarCanciones&rows=50`;
         document.body.appendChild(script);
     </script>
+</body>
+</html>
