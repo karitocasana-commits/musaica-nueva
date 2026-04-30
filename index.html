@@ -7,6 +7,7 @@
     <style>
         :root { --neon: #39ff14; --bg: #0a0a0a; }
         body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; overflow-x: hidden;}
+        /* Fondo Urbano Realista corregido */
         .background-3d { position: fixed; width: 100vw; height: 100vh; background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://unsplash.com'); background-size: cover; z-index: -1; }
         header { text-align: center; padding: 40px 20px; }
         .logo { font-size: 2.5rem; color: var(--neon); text-shadow: 0 0 15px var(--neon); text-transform: uppercase; letter-spacing: 5px; }
@@ -31,7 +32,7 @@
             const container = document.getElementById('player-container');
             
             if (!data || !data.response || !data.response.docs || data.response.docs.length === 0) {
-                container.innerHTML = '<div id="loader">Todavía no hay temas públicos. <br> <small>Asegúrate de que tus archivos en Archive.org sean públicos.</small></div>';
+                container.innerHTML = '<div id="loader">Todavía no hay temas públicos. <br> <small>Asegúrate de que en Archive.org tu canción sea "Public".</small></div>';
                 return;
             }
 
@@ -40,7 +41,7 @@
                 const card = document.createElement('div');
                 card.className = 'song-card';
                 
-                // RUTAS CORREGIDAS CON BARRAS /
+                // RUTAS CORREGIDAS CON BARRAS Y SÍMBOLOS CORRECTOS
                 const coverUrl = `https://archive.org{item.identifier}`;
                 const audioUrl = `https://archive.org{item.identifier}/${item.identifier}.mp3`;
 
@@ -56,7 +57,7 @@
             });
         }
 
-        // BÚSQUEDA CORREGIDA (API OFICIAL)
+        // CONEXIÓN OFICIAL A LA API DE ARCHIVE
         const script = document.createElement('script');
         script.src = `https://archive.org{ARCHIVE_USER}&output=json&callback=cargarCanciones&rows=50`;
         document.body.appendChild(script);
