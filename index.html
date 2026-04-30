@@ -7,40 +7,39 @@
     <style>
         :root { --neon: #39ff14; --bg: #0a0a0a; }
         body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; overflow-x: hidden;}
-        .background-3d { position: fixed; width: 100vw; height: 100vh; background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://unsplash.com'); background-size: cover; z-index: -1; }
+        .background-3d { position: fixed; width: 100vw; height: 100vh; background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://unsplash.com'); background-size: cover; z-index: -1; }
         header { text-align: center; padding: 40px 20px; }
         .logo { font-size: 2.5rem; color: var(--neon); text-shadow: 0 0 15px var(--neon); text-transform: uppercase; letter-spacing: 5px; }
         #player-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; padding: 20px; max-width: 1100px; margin: auto; }
         .song-card { background: rgba(255,255,255,0.08); backdrop-filter: blur(10px); padding: 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); text-align: center; transition: 0.4s; }
         .song-card:hover { transform: translateY(-5px); border-color: var(--neon); }
-        .cover-wrapper img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        .cover-wrapper img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 10px; }
         audio { width: 100%; margin: 15px 0; filter: invert(1); }
         .btn-download { display: inline-block; background: var(--neon); color: black; padding: 12px 25px; text-decoration: none; font-weight: bold; border-radius: 50px; }
-        #loader { font-size: 1.5rem; text-align: center; width: 100%; grid-column: 1/-1; }
+        #loader { font-size: 1.5rem; text-align: center; width: 100%; grid-column: 1/-1; color: var(--neon); }
     </style>
 </head>
 <body>
     <div class="background-3d"></div>
     <header><h1 class="logo">URBAN MUSIC</h1></header>
-    <main id="player-container"><div id="loader">Buscando tus temas en Archive.org...</div></main>
+    <main id="player-container"><div id="loader">Sincronizando con Archive.org...</div></main>
 
     <script>
         const ARCHIVE_USER = 'karito_casana';
 
         function cargarCanciones(data) {
             const container = document.getElementById('player-container');
-            container.innerHTML = '';
-
+            
             if (!data || !data.response || !data.response.docs || data.response.docs.length === 0) {
-                container.innerHTML = `<h2>Aún no hay música pública.</h2><p>Asegúrate de que tus archivos en Archive.org sean públicos.</p>`;
+                container.innerHTML = '<div id="loader">Todavía no hay temas públicos. <br> <small>Si acabas de subir uno, espera 10 min.</small></div>';
                 return;
             }
 
+            container.innerHTML = '';
             data.response.docs.forEach(item => {
                 const card = document.createElement('div');
                 card.className = 'song-card';
                 
-                // CORRECCIÓN DE URLs (Barras y rutas oficiales)
                 const coverUrl = `https://archive.org{item.identifier}`;
                 const audioUrl = `https://archive.org{item.identifier}/${item.identifier}.mp3`;
 
@@ -49,17 +48,16 @@
                         <img src="${coverUrl}" alt="Portada" onerror="this.src='https://archive.org'">
                     </div>
                     <h3>${item.title ? item.title.replace(/-/g, ' ') : 'Música Nueva'}</h3>
-                    <audio controls preload="none">
-                        <source src="${audioUrl}" type="audio/mpeg">
-                    </audio>
+                    <audio controls preload="none"><source src="${audioUrl}" type="audio/mpeg"></audio>
                     <a href="${audioUrl}" download class="btn-download">DESCARGAR MP3</a>
                 `;
                 container.appendChild(card);
             });
         }
 
+        // Búsqueda mejorada: Busca por uploader o por cualquier mención a tu usuario
         const script = document.createElement('script');
-        script.src = `https://archive.org{ARCHIVE_USER}&output=json&callback=cargarCanciones&rows=50`;
+        script.src = `https://archive.org:(${ARCHIVE_USER})&output=json&callback=cargarCanciones&rows=50`;
         document.body.appendChild(script);
     </script>
 </body>
