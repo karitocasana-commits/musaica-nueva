@@ -3,163 +3,226 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VideoStream - Plataforma Multimedia</title>
+    <title>UltraHub - Tu Plataforma de Video</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { background-color: #09090b; color: #f4f4f5; }
         .video-card:hover .play-overlay { opacity: 1; }
-        .age-modal { background: rgba(0, 0, 0, 0.9); backdrop-filter: blur(8px); }
+        .age-modal { background: rgba(0, 0, 0, 0.95); backdrop-filter: blur(10px); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .aspect-video-container { position: relative; padding-bottom: 56.25%; height: 0; }
+        .aspect-video-container iframe, .aspect-video-container video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 0.75rem; }
     </style>
 </head>
-<body class="font-sans">
+<body class="font-sans overflow-hidden">
 
-    <!-- Modal de Verificación de Edad -->
-    <div id="age-verification" class="fixed inset-0 z-50 flex items-center justify-center age-modal p-4">
+    <!-- Modal de Verificación de Edad (Obligatorio) -->
+    <div id="age-verification" class="fixed inset-0 z-[100] flex items-center justify-center age-modal p-4">
         <div class="bg-zinc-900 border border-zinc-800 p-8 rounded-2xl max-w-md w-full text-center shadow-2xl">
-            <h2 class="text-2xl font-bold mb-4 text-red-500">ADVERTENCIA DE CONTENIDO</h2>
-            <p class="text-zinc-400 mb-6">Este sitio web contiene material para adultos y solo es apto para personas mayores de 18 años.</p>
+            <div class="mb-6 inline-flex items-center justify-center w-16 h-16 bg-red-600/10 rounded-full">
+                <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            </div>
+            <h2 class="text-2xl font-bold mb-4 text-white">CONTENIDO PARA ADULTOS</h2>
+            <p class="text-zinc-400 mb-8 leading-relaxed">Este sitio contiene material explícito y solo es accesible para adultos. Al entrar, confirmas que tienes al menos 18 años.</p>
             <div class="flex flex-col gap-3">
-                <button onclick="confirmAge()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg transition">
+                <button onclick="confirmAge()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-xl transition-all transform active:scale-95 shadow-lg shadow-red-900/20">
                     Soy mayor de 18 años - Entrar
                 </button>
-                <a href="https://www.google.com" class="text-zinc-500 hover:text-zinc-300 text-sm py-2">
+                <a href="https://www.google.com" class="text-zinc-500 hover:text-white text-sm py-2 transition">
                     Soy menor de edad - Salir
                 </a>
             </div>
         </div>
     </div>
 
-    <!-- Navegación -->
-    <nav class="sticky top-0 z-40 bg-zinc-950 border-b border-zinc-800 px-4 py-3 flex items-center justify-between">
+    <!-- Interfaz de Reproductor (Oculta por defecto) -->
+    <div id="video-player-view" class="fixed inset-0 z-50 bg-black hidden overflow-y-auto">
+        <nav class="p-4 flex items-center gap-4 border-b border-zinc-800">
+            <button onclick="closePlayer()" class="p-2 hover:bg-zinc-800 rounded-full transition">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <span class="font-bold text-red-600">ULTRA<span class="text-white">HUB</span> PLAYER</span>
+        </nav>
+        <div class="max-w-6xl mx-auto p-4 lg:p-8">
+            <div class="aspect-video-container bg-zinc-900 rounded-xl mb-6 shadow-2xl overflow-hidden border border-zinc-800">
+                <!-- Aquí iría el iframe del video real -->
+                <div class="absolute inset-0 flex items-center justify-center flex-col gap-4">
+                    <p class="text-zinc-500 italic">Conectando con el servidor de streaming...</p>
+                    <div class="w-12 h-12 border-4 border-red-600 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+            </div>
+            <h2 id="player-title" class="text-2xl font-bold mb-2">Cargando video...</h2>
+            <div class="flex items-center gap-6 text-sm text-zinc-400 mb-8 pb-8 border-b border-zinc-800">
+                <span>1.2M vistas</span>
+                <span class="text-green-500 font-bold">98% APROBACIÓN</span>
+                <span>4K ULTRA HD</span>
+            </div>
+            <h3 class="font-bold mb-4 uppercase tracking-widest text-zinc-500 text-xs">Videos Recomendados</h3>
+            <div id="recommended-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <!-- Se llena dinámicamente -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Navegación Principal -->
+    <nav class="sticky top-0 z-40 bg-zinc-950/80 backdrop-blur-md border-b border-zinc-800 px-4 py-3 flex items-center justify-between">
         <div class="flex items-center gap-8">
-            <h1 class="text-2xl font-black text-red-600 tracking-tighter">ULTRA<span class="text-white">HUB</span></h1>
-            <div class="hidden md:flex gap-6 text-sm font-medium text-zinc-400">
-                <a href="#" class="hover:text-white transition">Tendencias</a>
-                <a href="#" class="hover:text-white transition">Categorías</a>
-                <a href="#" class="hover:text-white transition">Cámaras</a>
+            <h1 class="text-2xl font-black text-red-600 tracking-tighter cursor-pointer" onclick="location.reload()">ULTRA<span class="text-white">HUB</span></h1>
+            <div class="hidden lg:flex gap-6 text-xs font-bold uppercase tracking-widest text-zinc-400">
+                <a href="#" class="hover:text-red-500 transition">Videos</a>
+                <a href="#" class="hover:text-red-500 transition">Categorías</a>
+                <a href="#" class="hover:text-red-500 transition">En Vivo</a>
             </div>
         </div>
 
         <div class="flex-1 max-w-xl mx-8 hidden sm:block">
-            <div class="relative">
-                <input type="text" placeholder="Buscar contenido..." class="w-full bg-zinc-900 border border-zinc-800 rounded-full py-2 px-5 focus:outline-none focus:border-red-600 transition">
+            <div class="relative group">
+                <input type="text" placeholder="Buscar entre millones de videos..." class="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl py-2.5 px-5 focus:outline-none focus:ring-2 focus:ring-red-600/50 focus:border-red-600 transition">
+                <div class="absolute right-3 top-2.5 text-zinc-500">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </div>
             </div>
         </div>
 
         <div class="flex items-center gap-4">
-            <button class="bg-zinc-800 hover:bg-zinc-700 px-4 py-2 rounded-lg text-sm font-bold transition">Subir</button>
-            <div class="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center font-bold">U</div>
+            <button class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-xs font-bold transition shadow-lg shadow-red-900/20">PREMIUM</button>
+            <div class="w-10 h-10 bg-zinc-800 hover:bg-zinc-700 cursor-pointer rounded-full flex items-center justify-center font-bold border border-zinc-700 transition">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"></path></svg>
+            </div>
         </div>
     </nav>
 
-    <!-- Contenido Principal -->
+    <!-- Contenido -->
     <main class="max-w-7xl mx-auto px-4 py-8">
-        
         <div class="flex flex-col md:flex-row gap-8">
-            <!-- Barra Lateral de Categorías -->
-            <aside class="w-full md:w-64 flex-shrink-0">
-                <div class="bg-zinc-900/50 rounded-2xl p-6 sticky top-24">
-                    <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
-                        <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
-                        Categorías
-                    </h2>
-                    <ul class="space-y-2 text-zinc-400 text-sm">
-                        <li><a href="#" class="hover:text-white hover:bg-zinc-800 p-2 rounded-lg block transition">Amateur</a></li>
-                        <li><a href="#" class="hover:text-white hover:bg-zinc-800 p-2 rounded-lg block transition">Anal</a></li>
-                        <li><a href="#" class="hover:text-white hover:bg-zinc-800 p-2 rounded-lg block transition">Big Tits</a></li>
-                        <li><a href="#" class="hover:text-white hover:bg-zinc-800 p-2 rounded-lg block transition">Ebony</a></li>
-                        <li><a href="#" class="hover:text-white hover:bg-zinc-800 p-2 rounded-lg block transition">Hentai</a></li>
-                        <li><a href="#" class="hover:text-white hover:bg-zinc-800 p-2 rounded-lg block transition">Latina</a></li>
-                        <li><a href="#" class="hover:text-white hover:bg-zinc-800 p-2 rounded-lg block transition">MILF</a></li>
-                        <li><a href="#" class="hover:text-white hover:bg-zinc-800 p-2 rounded-lg block transition">POV</a></li>
-                        <li><a href="#" class="hover:text-white hover:bg-zinc-800 p-2 rounded-lg block transition">Teen (18+)</a></li>
-                    </ul>
+            <!-- Menú Lateral -->
+            <aside class="w-full md:w-56 flex-shrink-0">
+                <div class="space-y-1">
+                    <h2 class="px-4 text-xs font-black text-zinc-500 uppercase tracking-widest mb-4">Navegación</h2>
+                    <a href="#" class="flex items-center gap-3 px-4 py-2.5 bg-red-600/10 text-red-500 rounded-xl font-bold">
+                        <span>Inicio</span>
+                    </a>
+                    <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-xl transition">
+                        <span>Populares</span>
+                    </a>
+                    <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-xl transition">
+                        <span>Nuevos</span>
+                    </a>
+                    
+                    <h2 class="px-4 text-xs font-black text-zinc-500 uppercase tracking-widest mt-8 mb-4">Categorías</h2>
+                    <div id="category-list" class="space-y-1">
+                        <!-- Se llena con JS -->
+                    </div>
                 </div>
             </aside>
 
-            <!-- Grid de Videos -->
+            <!-- Lista de Videos -->
             <div class="flex-1">
-                <!-- Filtros rápidos -->
-                <div class="flex gap-2 overflow-x-auto pb-6 mb-4 no-scrollbar">
-                    <span class="text-green-500 font-bold uppercase">98%</span>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    
-                    <!-- Video Card con Enlace Realista -->
-                    <a href="https://www.example.com/video/player-1" class="video-card group block">
-                        <div class="relative aspect-video bg-zinc-800 rounded-xl overflow-hidden mb-3">
-                            <img src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=800&q=80" alt="Thumbnail" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
-                            <div class="absolute bottom-2 right-2 bg-black/80 px-2 py-0.5 rounded text-xs font-bold text-white">18:32</div>
-                            <div class="play-overlay absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 transition-opacity">
-                                <div class="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center shadow-lg">
-                                    <svg class="w-6 h-6 fill-white" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                                </div>
-                            </div>
-                        </div>
-                        <h3 class="font-bold text-sm leading-tight line-clamp-2 group-hover:text-red-500 transition">Video Destacado: Las mejores escenas de la semana en HD</h3>
-                        <div class="flex items-center justify-between mt-2 text-xs text-zinc-500">
-                            <span>1.2M vistas • 4K</span>
-                            <span class="text-green-500 font-bold uppercase">99%</span>
-                        </div>
-                    </a>
-
-                    <!-- Generación de más tarjetas -->
-                    <script>
-                        const container = document.querySelector('.grid');
-                        const titles = [
-                            "Amateur pareja joven en casa",
-                            "Recopilación de escenas POV 2024",
-                            "Especial categorías latinas HD",
-                            "Estrenos exclusivos de la semana",
-                            "Top 10 videos más vistos del mes"
-                        ];
-                        
-                        for(let i=0; i<8; i++) {
-                            const title = titles[i % titles.length];
-                            const card = `
-                                <a href="https://www.example.com/video/id-${i}" class="video-card group block">
-                                    <div class="relative aspect-video bg-zinc-800 rounded-xl overflow-hidden mb-3">
-                                        <img src="https://images.unsplash.com/photo-1485846234645-a62644f84728?w=800&q=80&sig=${i}" alt="Thumbnail" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
-                                        <div class="absolute bottom-2 right-2 bg-black/80 px-2 py-0.5 rounded text-xs font-bold text-white">${Math.floor(Math.random()*20)+5}:00</div>
-                                        <div class="play-overlay absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 transition-opacity">
-                                            <div class="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center">
-                                                <svg class="w-6 h-6 fill-white" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <h3 class="font-bold text-sm leading-tight line-clamp-2 group-hover:text-red-500 transition">${title}</h3>
-                                    <div class="flex items-center justify-between mt-2 text-xs text-zinc-500">
-                                        <span>${Math.floor(Math.random()*900)+100}k vistas</span>
-                                        <span class="text-green-500 font-bold uppercase">${Math.floor(Math.random()*20)+80}%</span>
-                                    </div>
-                                </a>
-                            `;
-                            container.insertAdjacentHTML('beforeend', card);
-                        }
-                    </script>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10" id="main-video-grid">
+                    <!-- Las tarjetas se generan dinámicamente -->
                 </div>
             </div>
         </div>
     </main>
 
-    <!-- Footer Simple -->
-    <footer class="border-t border-zinc-800 mt-20 py-10 px-4 text-center text-zinc-600 text-sm">
-        <p>&copy; 2024 UltraHub. Todos los derechos reservados. 2257 Compliance.</p>
-        <div class="flex justify-center gap-6 mt-4">
-            <a href="#" class="hover:text-zinc-400">Privacidad</a>
-            <a href="#" class="hover:text-zinc-400">Términos</a>
-            <a href="#" class="hover:text-zinc-400">Contacto</a>
+    <footer class="border-t border-zinc-900 bg-black mt-20 py-12 px-4 text-center">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-xl font-bold text-zinc-400 mb-6 uppercase tracking-widest">UltraHub</h2>
+            <div class="flex flex-wrap justify-center gap-x-8 gap-y-4 mb-8 text-zinc-500 text-sm">
+                <a href="#" class="hover:text-red-500 transition">Sobre nosotros</a>
+                <a href="#" class="hover:text-red-500 transition">Términos de servicio</a>
+                <a href="#" class="hover:text-red-500 transition">Política de privacidad</a>
+                <a href="#" class="hover:text-red-500 transition">Contacto</a>
+                <a href="#" class="hover:text-red-500 transition">2257 Exemption</a>
+            </div>
+            <p class="text-zinc-700 text-xs">&copy; 2024 UltraHub Entertainment Group. Todo el contenido es generado por usuarios o licenciado.</p>
         </div>
     </footer>
 
     <script>
+        const categories = ["Amateur", "Latina", "Anal", "MILF", "Hentai", "Ebony", "Big Tits", "POV", "Teen (18+)", "Creampie", "Hardcore"];
+        const videoTitles = [
+            "Escena Amateur increíble en casa HD",
+            "Recopilación de las mejores Latinas 2024",
+            "Punto de vista exclusivo (POV) en 4K",
+            "MILF buscando diversión en el vecindario",
+            "Especial fin de semana: Escenas prohibidas",
+            "Casting real: Primera vez frente a cámaras",
+            "Vacaciones locas: Resumen de verano",
+            "Sesión nocturna HD sin censura"
+        ];
+
+        function init() {
+            renderCategories();
+            renderVideos('main-video-grid', 12);
+            renderVideos('recommended-grid', 4);
+        }
+
+        function renderCategories() {
+            const list = document.getElementById('category-list');
+            categories.forEach(cat => {
+                const link = document.createElement('a');
+                link.href = "#";
+                link.className = "flex items-center gap-3 px-4 py-2 text-zinc-500 hover:text-white hover:bg-zinc-800/50 rounded-xl transition text-sm";
+                link.textContent = cat;
+                list.appendChild(link);
+            });
+        }
+
+        function renderVideos(containerId, count) {
+            const container = document.getElementById(containerId);
+            for(let i=0; i<count; i++) {
+                const title = videoTitles[Math.floor(Math.random() * videoTitles.length)];
+                const views = (Math.random() * 2).toFixed(1) + "M";
+                const rating = Math.floor(Math.random() * 20) + 80;
+                const duration = `${Math.floor(Math.random()*15)+5}:${Math.floor(Math.random()*50)+10}`;
+                
+                const card = `
+                    <div class="video-card group cursor-pointer" onclick="openPlayer('${title}')">
+                        <div class="relative aspect-video bg-zinc-800 rounded-2xl overflow-hidden mb-3 shadow-lg ring-1 ring-white/5">
+                            <img src="https://picsum.photos/seed/${containerId + i}/800/450" alt="Thumbnail" class="w-full h-full object-cover group-hover:scale-110 transition duration-700 ease-out">
+                            <div class="absolute bottom-3 right-3 bg-black/90 px-2 py-1 rounded-md text-[10px] font-black text-white backdrop-blur-md">${duration}</div>
+                            <div class="play-overlay absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 transition-opacity duration-300">
+                                <div class="w-14 h-14 bg-red-600 rounded-full flex items-center justify-center shadow-2xl scale-75 group-hover:scale-100 transition-transform">
+                                    <svg class="w-8 h-8 fill-white ml-1" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                </div>
+                            </div>
+                        </div>
+                        <h3 class="font-bold text-sm leading-snug line-clamp-2 group-hover:text-red-500 transition-colors">${title}</h3>
+                        <div class="flex items-center justify-between mt-2 text-[11px] font-medium text-zinc-500 uppercase tracking-tighter">
+                            <span>${views} VISTAS</span>
+                            <span class="text-green-500 font-bold">${rating}%</span>
+                        </div>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', card);
+            }
+        }
+
         function confirmAge() {
-            document.getElementById('age-verification').style.display = 'none';
+            document.getElementById('age-verification').classList.add('opacity-0');
+            setTimeout(() => {
+                document.getElementById('age-verification').style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }, 300);
+        }
+
+        function openPlayer(title) {
+            document.getElementById('player-title').textContent = title;
+            document.getElementById('video-player-view').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function closePlayer() {
+            document.getElementById('video-player-view').classList.add('hidden');
             document.body.style.overflow = 'auto';
         }
-        // Bloquear scroll hasta que verifique edad
+
+        // Bloquear scroll inicial
         document.body.style.overflow = 'hidden';
+        
+        window.onload = init;
     </script>
 </body>
 </html>
